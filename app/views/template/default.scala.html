@@ -1,0 +1,51 @@
+@(title: String, header:Html = Html(""))(body: Html)
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+
+    <!-- Bootstrap -->
+    <link href="@routes.Assets.at("libraries/bootstrap/css/bootstrap.min.css")" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="@routes.Assets.at("libraries/bootstrap/js/bootstrap.min.js")"></script>
+
+</head>
+<body>
+
+<script src="@routes.Assets.at("libraries/highcharts/highcharts.js")"></script>
+
+<!-- Wrap all page content here -->
+<div id="wrap">
+    <!-- Begin page content -->
+    <div class="container">
+        <div class="page-header">
+            <h3>Latency Report</h3>
+        </div>
+
+        @body
+    </div>
+</div>
+
+<div id="footer">
+    <div class="container">
+        <p class="text-muted credit">SEVEN Network Inc.</p>
+    </div>
+</div>
+
+</body>
+</html>

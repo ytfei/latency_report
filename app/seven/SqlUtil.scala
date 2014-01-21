@@ -1,4 +1,4 @@
-package models
+package seven
 
 /**
  * Created by eyang on 1/17/14.

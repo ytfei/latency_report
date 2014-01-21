@@ -1,7 +1,10 @@
-@(message: String)
+@(data: List[Apk])
 
-@main("Welcome to Play") {
-
-    @play20.welcome(message)
-
+@template.default("Latency Report") {
+<ol>
+    <li><a href="@routes.Application.byGlobal()">All apk</a></li>
+    @for(apk <- data){
+        <li><a href="@routes.Application.byApk(apk.name)">@apk.name</a></li>
+    }
+</ol>
 }

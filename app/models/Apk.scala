@@ -6,20 +6,21 @@ import anorm.SqlParser._
 import anorm.~
 import play.api.Play.current
 import play.Logger
+import seven.SqlUtil
 
 /**
  * Created by eyang on 1/16/14.
  *
  * Apk model
  */
-case class Apk(id: Pk[Long], name: String, version: String, versionCode: String)
+case class Apk(id: Pk[Long], name: String, version: Option[String], versionCode: Option[String])
 
 object Apk {
   val simple = {
     get[Pk[Long]]("id") ~
       get[String]("name") ~
-      get[String]("version") ~
-      get[String]("version_code") map {
+      get[Option[String]]("version") ~
+      get[Option[String]]("version_code") map {
       case id ~ name ~ version ~ versionCode =>
         Apk(id, name, version, versionCode)
     }
@@ -53,6 +54,12 @@ object Apk {
       SQL("select * from application where name = {name}")
         .on('name -> name)
         .as(simple.singleOpt)
+    })
+  }
+
+  def getAll: List[Apk] = {
+    DB.withConnection(implicit c => {
+      SQL("select id,name,version,version_code from application").as(simple *)
     })
   }
 }

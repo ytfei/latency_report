@@ -5,6 +5,7 @@ import anorm.SqlParser._
 import play.api.Play.current
 import play.api.db.DB
 import play.Logger
+import seven.SqlUtil
 
 /**
  * Created by eyang on 1/16/14.

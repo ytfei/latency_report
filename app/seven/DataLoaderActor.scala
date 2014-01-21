@@ -105,12 +105,9 @@ class DataLoaderActor extends Actor {
   private[this] case class Tag(appName: String, behaviorName: String)
 
   private[this] case class Data(deviceTag: String, latency: List[Double]) {
-    def avg: Double = {
-      if (latency.size == 0)
-        0.0
-      else
-        latency.foldLeft(0.0)((sum, elem) => sum + elem) / latency.size
-    }
+    def avg: Double =
+      if (latency.size == 0) 0.0
+      else latency.foldLeft(0.0)((sum, elem) => sum + elem) / latency.size
   }
 
 }

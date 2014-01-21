@@ -1,0 +1,46 @@
+@(data: Map[String, Map[String, List[String]]])
+
+@id(txt: String) = @{
+    Math.abs(txt.hashCode)
+}
+
+@template.default("Latency Report") {
+
+    <script type="text/javascript">
+        $(function () {
+            @for(e <- data) {
+                $('#report').append('<div id="@id(e._1)"></div>');
+
+                $('#@id(e._1)').highcharts({
+                    title: { text: 'Latency Trend', x: -20 }, //center
+
+                    subtitle: { text: 'Behavior: @e._1', x: -20 },
+
+                    xAxis: { categories: [ @e._2.get("x_axis").map{l => @l.sorted.toSet.mkString(",") }.getOrElse("") ] },
+
+                    yAxis: {
+                        title: { text: 'Latency (sec)' },
+
+                        plotLines: [{ value: 0, width: 1, color: '#808080' }]
+                    },
+
+                    tooltip: { valueSuffix: ' sec' },
+
+                    legend: { layout: 'vertical', align: 'right', verticalAlign: 'middle', borderWidth: 0 },
+
+                    series: [
+                        @for(series <- e._2) {
+                            @if(series._1 != "x_axis") {
+                                { name: '@series._1', data: [ @series._2.foldLeft("")((r, e) => r + e + ",") ] },
+                            }
+                        }
+                    ]
+                });
+            }
+        });
+    </script>
+
+
+    <div id="report"></div>
+
+}

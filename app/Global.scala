@@ -17,6 +17,6 @@ object Global extends GlobalSettings {
     // schedule task to load data timely
     val sys = Akka.system(app)
     val dataLoader = sys.actorOf(Props[DataLoaderActor])
-    sys.scheduler.schedule(0.microsecond, 5.second, dataLoader, DataLoaderActor.Signal)
+    sys.scheduler.schedule(0.microsecond, 20.second, dataLoader, DataLoaderActor.Signal)
   }
 }
