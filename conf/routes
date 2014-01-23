@@ -5,6 +5,8 @@
 # Home page
 GET     /                           controllers.Application.index
 
+GET     /report                     controllers.Application.queryReport
+
 GET     /by_global                  controllers.Application.byGlobal
 
 GET     /by_apk/:apkName            controllers.Application.byApk(apkName: String)
