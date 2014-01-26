@@ -6,7 +6,9 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache
-)     
+)
+
+libraryDependencies += "org.yaml" % "snakeyaml" % "1.13"
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.27"
 

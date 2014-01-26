@@ -12,7 +12,7 @@ import java.util.Date
 object Application extends Controller {
 
   def index = Action {
-    Ok(html.index(Apk.getAll, queryForm))
+    Ok(html.index(Apk.getAll))
   }
 
   def byGlobal = Action {
@@ -26,15 +26,15 @@ object Application extends Controller {
   def queryReport = Action {
     implicit request =>
       queryForm.bindFromRequest.fold(
-        error => BadRequest(html.index(Apk.getAll, error)),
-        data => Ok(html.index(Apk.getAll, queryForm.fill(data)))
+        error => BadRequest(html.customized(Apk.getAll, error)),
+        data => Ok(html.customized(Apk.getAll, queryForm.fill(data)))
       )
   }
 
   val myDateFormat = of[Date](Formats.dateFormat("yyyy-MM-dd HH:mm:ss"))
   val queryForm = Form(mapping(
     "key" -> nonEmptyText,
-    "startAt" -> myDateFormat.verifying("error date format, for demo", d => false),
+    "startAt" -> myDateFormat,
     "endAt" -> myDateFormat)(ReportQuery.apply)(ReportQuery.unapply)
     .verifying("The start time should after end time!", data => {
       data.startAt.before(data.endAt)

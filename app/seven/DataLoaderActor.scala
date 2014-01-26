@@ -6,6 +6,7 @@ import play.api.Play.current
 import java.io.{FileFilter, File}
 import play.api.libs.Files
 import models.{LatencyData, Device, Behavior, Apk}
+import seven.util.YamlLoader
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,6 +17,43 @@ import models.{LatencyData, Device, Behavior, Apk}
 
 object DataLoaderActor {
   val Signal = "check"
+
+  // todo: we should load this info from configuration files.
+  private val sid2imei = Map("4df1d4cc71639f5f" -> "354666058239559",
+    "4df715a1116dcf5f" -> "355251053959128",
+    "4df71bad4728cf6f" -> "355251055270136",
+    "4df798b5208dcf9f" -> "355251055270607")
+
+  private val imei2sid = sid2imei.map(x => x._2 -> x._1)
+
+  private val sid2tag = Map("4df1d4cc71639f5f" -> "D4", "4df715a1116dcf5f" -> "D1",
+    "4df71bad4728cf6f" -> "D3", "4df71bad4728cf6f" -> "D2")
+
+  private def isSerialId(id: String) = sid2imei.contains(id)
+
+  private def isIMEI(id: String) = imei2sid.contains(id)
+
+  private def toSerialId(imei: String) = imei2sid.get(imei)
+
+  private def toIMEI(sid: String) = sid2imei.get(sid)
+
+  private def toTag(id: String): String = {
+    if (isSerialId(id))
+      sid2tag.get(id).get
+    else if (isIMEI(id)) {
+      toSerialId(id).fold("")((imei: String) => toSerialId(imei).fold("")(sid => sid2tag.get(sid).get))
+    } else "unknown"
+  }
+
+  def fromId(id: String): Option[(String, String)] = {
+    if (isSerialId(id) && toIMEI(id).isDefined)
+      Some((id, toIMEI(id).get))
+    else if (isIMEI(id) && toSerialId(id).isDefined) {
+      Some((toSerialId(id).get, id))
+    } else {
+      None
+    }
+  }
 }
 
 class DataLoaderActor extends Actor {
@@ -47,13 +85,37 @@ class DataLoaderActor extends Actor {
       })
   }
 
-  val PERFORMANCE = "performance.csv"
+  private val PERFORMANCE = "performance.csv"
+  private val OC = """device-(\w{1,})-oc-info.yml""".r
+  private val DEVICE = """device-(\w{1,})-device-info.yml""".r
 
   private def loadDataFrom(subDir: File): Unit = {
     val TIME_REGEX(testTime, _) = subDir.getName
     subDir.listFiles.foreach(f => f.getName match {
       case PERFORMANCE => loadPerformanceData(f, testTime)
-      case "device-only" =>
+      case OC(id) => loadOCData(id, f)
+      case DEVICE(id) => loadDeviceData(id, f)
+      case str => Logger.warn("Unsupported file: " + f.getAbsolutePath)
+    })
+  }
+
+  def loadOCData(id: String, file: File) = {
+    fromId(id).fold(Logger.error("Cannot find any id info for device: %s, data file %s".format(id, file.getAbsolutePath)))(v => {
+      val data = YamlLoader.load(file)
+      val oc = models.OC(data)
+
+      models.OC.addOC(oc.name, oc.version, oc.relayHost, oc.dormancy, oc.versionCode)
+    })
+  }
+
+  def loadDeviceData(id: String, file: File): Unit = {
+    fromId(id).fold(Logger.error("Cannot find any id info for device: %s, data file %s".format(id, file.getAbsolutePath)))(v => {
+      val (sid, _) = v
+      val data = YamlLoader.load(file)
+      val device = Device(data).copy(serialId = Some(sid), tag = toTag(sid))
+
+      Device.addDevice(device.tag, device.serialId, device.model,
+        device.modelVersion, device.imei)
     })
   }
 

@@ -1,50 +1,12 @@
-@(apkList: List[Apk], data:Form[ReportQuery])(implicit lang: Lang)
-
-@import helper._
-@import play.api.i18n._
-
+@(apkList: List[Apk])(implicit lang: Lang)
 
 @template.default("Latency Report") {
-
     <div class="row">
-        @form(action = routes.Application.queryReport(), args = 'method -> "GET", 'class -> "form-inline") {
-            @data.globalError.map { error => <div class="alert alert-error"> @error.message </div> }
-
-            @if(data.hasGlobalErrors) {
-                <div class="alert alert-error">
-                <ul> @data.globalErrors.foreach { error => <li>@error.message</li> } </ul>
-                </div>
+        <ul>
+            <li><a href="@routes.Application.byGlobal">All by apk</a></li>
+            @for(apk <- apkList) {
+                <li><a href="@routes.Application.byApk(apk.name)">@apk.name</a></li>
             }
-
-            @if(data.hasErrors) {
-                <div class="alert alert-error"><ul>
-                @defining(List("startAt", "endAt")) { fields =>
-                    @for(f <- fields) {
-                        @data.error(f).map { e => <li>@Messages(e.message)</li> }
-                    }
-                }
-                </ul></div>
-            }
-
-
-        <div class="form-group">
-            <label class="sr-only" for="key">App:</label>
-            <select name="key" id="key" class="form-control">
-                @for(apk <- apkList){
-                <option value="@apk.name" @if(data("key").value == Some(apk.name)) { selected="selected" }> @apk.name </option>
-                }
-            </select>
-        </div>
-
-        <div class="form-group">
-            <input class="form-control" type="datetime" name="startAt" id="startAt" placeholder="Start Date" value="@data("startAt").value">
-        </div>
-
-        <div class="form-group">
-            <input class="form-control" type="datetime" name="endAt" id="endAt" placeholder="End Date" value="@data("endAt").value">
-        </div>
-
-        <button class="btn btn-primary" type="submit">Go</button>
-        }
+        </ul>
     </div>
 }

@@ -11,15 +11,27 @@ import play.Logger
  *
  * Open Channel app
  */
-case class OC(id: Pk[Long], name: String, relayHost: String,
-              dormancy: Int, version: String, versionCode: String)
+case class OC(id: Pk[Long], name: String, version: String, relayHost: Option[String],
+              dormancy: Option[Int], versionCode: Option[String])
 
 object OC {
-  def addOC(name: String, relayHost: Option[String], dormancy: Option[Int],
-            version: Option[String], versionCode: Option[String]) = {
+
+  def apply(data: Map[String, String]): OC = {
+    val id = Id(0L)
+    val name = data.get("").getOrElse("unknown")
+    val relayHost = data.get("relay_host")
+    val dormancy = data.get("dormancy_timeout").map(s => s.toInt)
+    val version = data.get("version_name").getOrElse("unknown")
+    val versionCode = data.get("version_code")
+
+    new OC(id, name, version, relayHost, dormancy, versionCode)
+  }
+
+  def addOC(name: String, version: String, relayHost: Option[String],
+            dormancy: Option[Int], versionCode: Option[String]) = {
     DB.withConnection(implicit c => {
-      val num = SQL("select count(1) from oc where name = {name}")
-        .on('name -> name).as(scalar[Long].single)
+      val num = SQL("select count(1) from oc where name = {name} and version = {v}")
+        .on('name -> name, 'v -> version).as(scalar[Long].single)
 
       if (num == 0) {
         Logger.info("Add new oc info: " + name)

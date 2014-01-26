@@ -12,10 +12,22 @@ import seven.SqlUtil
  *
  * Devices that used in test
  */
-case class Device(id: Pk[Long], tag: String, serialId: String,
-                  model: String, modelVersion: String, imei: String)
+case class Device(id: Pk[Long], tag: String, serialId: Option[String],
+                  model: Option[String], modelVersion: Option[String], imei: Option[String])
 
 object Device {
+
+  def apply(data: Map[String, String]): Device = {
+    val id = Id(0L)
+    val tag = data.get("tag").getOrElse("D1") // todo: how to define the tag <-> imei mapping?
+    val sid = data.get("serial_id") // todo: no serial id for now ...
+    val model = data.get("model")
+    val modelVersion = data.get("modelVersion")
+    val imei = data.get("imei")
+
+    new Device(id, tag, sid, model, modelVersion, imei)
+  }
+
   def addDevice(tag: String, serialId: Option[String] = None, model: Option[String] = None,
                 modelVersion: Option[String] = None, imei: Option[String] = None) = {
     DB.withConnection(implicit c => {
